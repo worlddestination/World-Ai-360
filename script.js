@@ -408,7 +408,7 @@ function buildPrompt(query, tripType, budget) {
     '    { "tier": "Luxury", "pricePerDay": "$200–$500+", "featured": false, "items": [{ "label": "Accommodation", "value": "$100–$300" },{ "label": "Food", "value": "$40–$80" },{ "label": "Transport", "value": "$30–$60" },{ "label": "Activities", "value": "$30–$60" }] }\n' +
     '  ],\n' +
     '  "tips": ["tip1","tip2","tip3","tip4","tip5","tip6"],\n' +
-     '  "weatherByMonth": [\n' +
+    '  "weatherByMonth": [\n' +
 '    { "month": "Jan", "temp": 28, "rainfall": 20,  "crowd": 60, "desc": "Sunny and warm" },\n' +
 '    { "month": "Feb", "temp": 29, "rainfall": 15,  "crowd": 55, "desc": "Best weather" },\n' +
 '    { "month": "Mar", "temp": 31, "rainfall": 25,  "crowd": 50, "desc": "Getting warmer" },\n' +
