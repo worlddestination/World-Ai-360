@@ -8,7 +8,7 @@
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 // Replace with your Gemini API key or inject via GitHub Actions / env variable
 const GEMINI_API_KEY = 'YOUR_GEMINI_API_KEY';
-const GEMINI_MODEL   = 'gemini-2.0-flash';
+const GEMINI_MODEL   = 'gemini-3-flash-preview';
 const UNSPLASH_SOURCE = 'https://source.unsplash.com/featured/800x500?';
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
