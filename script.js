@@ -408,6 +408,20 @@ function buildPrompt(query, tripType, budget) {
     '    { "tier": "Luxury", "pricePerDay": "$200–$500+", "featured": false, "items": [{ "label": "Accommodation", "value": "$100–$300" },{ "label": "Food", "value": "$40–$80" },{ "label": "Transport", "value": "$30–$60" },{ "label": "Activities", "value": "$30–$60" }] }\n' +
     '  ],\n' +
     '  "tips": ["tip1","tip2","tip3","tip4","tip5","tip6"],\n' +
+     '  "weatherByMonth": [\n' +
+'    { "month": "Jan", "temp": 28, "rainfall": 20,  "crowd": 60, "desc": "Sunny and warm" },\n' +
+'    { "month": "Feb", "temp": 29, "rainfall": 15,  "crowd": 55, "desc": "Best weather" },\n' +
+'    { "month": "Mar", "temp": 31, "rainfall": 25,  "crowd": 50, "desc": "Getting warmer" },\n' +
+'    { "month": "Apr", "temp": 33, "rainfall": 60,  "crowd": 45, "desc": "Pre-monsoon" },\n' +
+'    { "month": "May", "temp": 32, "rainfall": 120, "crowd": 35, "desc": "Monsoon starts" },\n' +
+'    { "month": "Jun", "temp": 29, "rainfall": 200, "crowd": 25, "desc": "Heavy rains" },\n' +
+'    { "month": "Jul", "temp": 27, "rainfall": 250, "crowd": 20, "desc": "Peak monsoon" },\n' +
+'    { "month": "Aug", "temp": 27, "rainfall": 220, "crowd": 22, "desc": "Still rainy" },\n' +
+'    { "month": "Sep", "temp": 28, "rainfall": 150, "crowd": 30, "desc": "Monsoon ends" },\n' +
+'    { "month": "Oct", "temp": 29, "rainfall": 70,  "crowd": 55, "desc": "Good weather" },\n' +
+'    { "month": "Nov", "temp": 28, "rainfall": 30,  "crowd": 70, "desc": "Peak season" },\n' +
+'    { "month": "Dec", "temp": 27, "rainfall": 20,  "crowd": 80, "desc": "Festive season" }\n' +
+'  ],\n' +
     '  "related": [\n' +
     '    { "name": "Dest 1", "country": "Country", "desc": "Why visit", "emoji": "🌏", "query": "travel guide dest 1" },\n' +
     '    { "name": "Dest 2", "country": "Country", "desc": "Why visit", "emoji": "🏝️", "query": "travel guide dest 2" },\n' +
@@ -489,6 +503,7 @@ if (selectedLang === 'Arabic') {
    setTimeout(updateCalc, 100);
    initBucketBar(data);
    initTripCard(data);
+   initWeatherChart(data);
   showResult();
   setTimeout(function() {
     document.getElementById('resultContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1501,4 +1516,210 @@ function selectLang(btn) {
   });
   btn.classList.add('active');
   selectedLang = btn.dataset.lang;
+}
+// ═══════════ WEATHER CHART ═══════════
+var weatherChartInstance = null;
+
+function initWeatherChart(data) {
+  var weatherData = data.weatherByMonth;
+  if (!weatherData || weatherData.length === 0) return;
+
+  var section = document.getElementById('weatherChartSection');
+  if (section) section.style.display = 'block';
+
+  var canvas = document.getElementById('weatherChart');
+  if (!canvas) return;
+
+  // Destroy old chart if exists
+  if (weatherChartInstance) {
+    weatherChartInstance.destroy();
+    weatherChartInstance = null;
+  }
+
+  var labels = weatherData.map(function(m) { return m.month; });
+  var temps  = weatherData.map(function(m) { return m.temp; });
+  var rains  = weatherData.map(function(m) { return m.rainfall; });
+  var crowds = weatherData.map(function(m) { return m.crowd; });
+
+  weatherChartInstance = new Chart(canvas, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Rainfall (mm)',
+          data: rains,
+          backgroundColor: 'rgba(56,189,248,0.25)',
+          borderColor: 'rgba(56,189,248,0.7)',
+          borderWidth: 1,
+          borderRadius: 6,
+          yAxisID: 'yRain',
+          order: 3
+        },
+        {
+          label: 'Crowd Level (%)',
+          data: crowds,
+          backgroundColor: 'rgba(248,113,113,0.2)',
+          borderColor: 'rgba(248,113,113,0.6)',
+          borderWidth: 1,
+          borderRadius: 6,
+          yAxisID: 'yCrowd',
+          order: 2
+        },
+        {
+          label: 'Temperature (°C)',
+          data: temps,
+          type: 'line',
+          borderColor: '#E8C96A',
+          backgroundColor: 'rgba(232,201,106,0.1)',
+          borderWidth: 2.5,
+          pointBackgroundColor: '#E8C96A',
+          pointRadius: 5,
+          pointHoverRadius: 7,
+          tension: 0.4,
+          fill: false,
+          yAxisID: 'yTemp',
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false
+      },
+      onClick: function(evt, elements) {
+        if (elements && elements.length > 0) {
+          var idx = elements[0].index;
+          highlightWeatherMonth(weatherData, idx);
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10,15,26,0.95)',
+          borderColor: 'rgba(201,168,76,0.3)',
+          borderWidth: 1,
+          titleColor: '#C9A84C',
+          bodyColor: 'rgba(232,230,224,0.8)',
+          padding: 12,
+          callbacks: {
+            title: function(items) {
+              return weatherData[items[0].dataIndex].month;
+            },
+            label: function(item) {
+              if (item.dataset.label.indexOf('Temp') >= 0)   return '🌡️ ' + item.raw + '°C';
+              if (item.dataset.label.indexOf('Rain') >= 0)   return '🌧️ ' + item.raw + ' mm';
+              if (item.dataset.label.indexOf('Crowd') >= 0)  return '👥 ' + item.raw + '% crowd';
+              return item.raw;
+            },
+            afterBody: function(items) {
+              var idx  = items[0].dataIndex;
+              return ['', '📝 ' + (weatherData[idx].desc || '')];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: { color: 'rgba(232,230,224,0.5)', font: { size: 12 } }
+        },
+        yTemp: {
+          type: 'linear',
+          position: 'left',
+          grid: { color: 'rgba(255,255,255,0.05)' },
+          ticks: {
+            color: '#E8C96A',
+            font: { size: 11 },
+            callback: function(v) { return v + '°'; }
+          },
+          title: {
+            display: true,
+            text: 'Temp °C',
+            color: 'rgba(232,201,106,0.6)',
+            font: { size: 11 }
+          }
+        },
+        yRain: {
+          type: 'linear',
+          position: 'right',
+          grid: { drawOnChartArea: false },
+          ticks: {
+            color: 'rgba(56,189,248,0.7)',
+            font: { size: 11 },
+            callback: function(v) { return v + 'mm'; }
+          },
+          title: {
+            display: true,
+            text: 'Rain mm',
+            color: 'rgba(56,189,248,0.5)',
+            font: { size: 11 }
+          }
+        },
+        yCrowd: {
+          type: 'linear',
+          position: 'right',
+          display: false,
+          max: 200
+        }
+      }
+    }
+  });
+
+  // Month cards render karo
+  renderWeatherMonthCards(weatherData);
+}
+
+function renderWeatherMonthCards(weatherData) {
+  var detail = document.getElementById('weatherMonthDetail');
+  if (!detail) return;
+
+  // Best month find karo — low rain + high temp + medium crowd
+  var bestIdx = 0;
+  var bestScore = -999;
+  weatherData.forEach(function(m, i) {
+    var score = m.temp - (m.rainfall / 10) - (m.crowd > 80 ? 10 : 0);
+    if (score > bestScore) { bestScore = score; bestIdx = i; }
+  });
+
+  detail.innerHTML = weatherData.map(function(m, i) {
+    var isBest = i === bestIdx;
+    return '<div class="weather-month-card' + (isBest ? ' best-month' : '') + '" ' +
+      'onclick="highlightWeatherMonth(window._weatherData, ' + i + ')">' +
+      '<div class="wmc-name">' + m.month + '</div>' +
+      '<div class="wmc-temp">' + m.temp + '°C</div>' +
+      '<div class="wmc-rain">🌧 ' + m.rainfall + 'mm</div>' +
+      '<div class="wmc-crowd">👥 ' + m.crowd + '%</div>' +
+      (isBest ? '<div class="wmc-badge">⭐ BEST</div>' : '') +
+    '</div>';
+  }).join('');
+
+  window._weatherData = weatherData;
+}
+
+function highlightWeatherMonth(weatherData, idx) {
+  var m = weatherData[idx];
+  if (!m) return;
+
+  // Chart tooltip force show
+  if (weatherChartInstance) {
+    weatherChartInstance.tooltip.setActiveElements(
+      [
+        { datasetIndex: 0, index: idx },
+        { datasetIndex: 1, index: idx },
+        { datasetIndex: 2, index: idx }
+      ],
+      { x: 0, y: 0 }
+    );
+    weatherChartInstance.update();
+  }
+
+  // Month cards highlight
+  document.querySelectorAll('.weather-month-card').forEach(function(card, i) {
+    card.style.borderColor = i === idx ? 'rgba(201,168,76,0.6)' : '';
+    card.style.background  = i === idx ? 'rgba(201,168,76,0.1)' : '';
+  });
 }
