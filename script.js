@@ -480,6 +480,7 @@ function renderResult(data, originalQuery) {
    initFollowupChat(data.destination);
    setTimeout(updateCalc, 100);
    initBucketBar(data);
+   initTripCard(data);
   showResult();
   setTimeout(function() {
     document.getElementById('resultContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1210,4 +1211,277 @@ function renderCompareResult(data, query1, query2) {
   resultEl.innerHTML = html;
   resultEl.style.display = 'block';
   resultEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+// ═══════════ TRIP CARD GENERATOR ═══════════
+var selectedTheme = 'gold';
+
+var cardThemes = {
+  gold: {
+    bg1: '#0A0F1A', bg2: '#1A2540',
+    accent: '#C9A84C', accent2: '#E8C96A',
+    text: '#FFFFFF', sub: 'rgba(255,255,255,0.6)'
+  },
+  ocean: {
+    bg1: '#0A1628', bg2: '#0D2B4A',
+    accent: '#38BDF8', accent2: '#7DD3FC',
+    text: '#FFFFFF', sub: 'rgba(255,255,255,0.6)'
+  },
+  forest: {
+    bg1: '#0A1A0F', bg2: '#0F2D18',
+    accent: '#4ADE80', accent2: '#86EFAC',
+    text: '#FFFFFF', sub: 'rgba(255,255,255,0.6)'
+  },
+  sunset: {
+    bg1: '#1A0A0A', bg2: '#2D1010',
+    accent: '#FB923C', accent2: '#FCD34D',
+    text: '#FFFFFF', sub: 'rgba(255,255,255,0.6)'
+  },
+  dark: {
+    bg1: '#000000', bg2: '#111111',
+    accent: '#FFFFFF', accent2: '#CCCCCC',
+    text: '#FFFFFF', sub: 'rgba(255,255,255,0.5)'
+  }
+};
+
+function selectTheme(btn) {
+  document.querySelectorAll('.theme-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  selectedTheme = btn.dataset.theme;
+  if (lastParsedData) drawTripCard(lastParsedData);
+}
+
+function initTripCard(data) {
+  drawTripCard(data);
+}
+
+function drawTripCard(data) {
+  var canvas = document.getElementById('tripcardCanvas');
+  if (!canvas) return;
+  var ctx    = canvas.getContext('2d');
+  var W      = 1080;
+  var H      = 1080;
+  var t      = cardThemes[selectedTheme] || cardThemes.gold;
+
+  ctx.clearRect(0, 0, W, H);
+
+  // Background gradient
+  var bgGrad = ctx.createLinearGradient(0, 0, W, H);
+  bgGrad.addColorStop(0, t.bg1);
+  bgGrad.addColorStop(1, t.bg2);
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Decorative circle top right
+  ctx.beginPath();
+  ctx.arc(W - 80, 80, 260, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  ctx.fill();
+
+  ctx.beginPath();
+  ctx.arc(W - 80, 80, 180, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.03)';
+  ctx.fill();
+
+  // Decorative circle bottom left
+  ctx.beginPath();
+  ctx.arc(100, H - 100, 200, 0, Math.PI * 2);
+  ctx.fillStyle = 'rgba(255,255,255,0.02)';
+  ctx.fill();
+
+  // Top accent line
+  var lineGrad = ctx.createLinearGradient(60, 0, 500, 0);
+  lineGrad.addColorStop(0, t.accent);
+  lineGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = lineGrad;
+  ctx.fillRect(60, 70, 440, 3);
+
+  // Flag + Region badge
+  var flag   = data.flag || '🌍';
+  var region = data.region || data.country || '';
+  ctx.font      = '52px serif';
+  ctx.fillStyle = t.text;
+  ctx.fillText(flag, 60, 160);
+
+  ctx.font      = 'bold 26px sans-serif';
+  ctx.fillStyle = t.accent;
+  ctx.fillText(region.toUpperCase(), 130, 155);
+
+  ctx.font      = '22px sans-serif';
+  ctx.fillStyle = t.sub;
+  ctx.fillText(data.country || '', 131, 185);
+
+  // Destination Name
+  var destName = data.destination || '';
+  ctx.fillStyle = t.text;
+  if (destName.length > 18) {
+    ctx.font = 'bold 72px sans-serif';
+  } else if (destName.length > 12) {
+    ctx.font = 'bold 88px sans-serif';
+  } else {
+    ctx.font = 'bold 108px sans-serif';
+  }
+  ctx.fillText(destName, 60, 340);
+
+  // Tagline
+  var tagline = data.tagline || '';
+  ctx.font      = 'italic 30px serif';
+  ctx.fillStyle = t.sub;
+  wrapText(ctx, tagline, 60, 400, 960, 42);
+
+  // Divider
+  ctx.fillStyle = 'rgba(255,255,255,0.08)';
+  ctx.fillRect(60, 480, 960, 1);
+
+  // Info boxes — 3 across
+  var quickInfo = data.quickInfo || [];
+  var season    = quickInfo.find(function(q) { return q.label === 'Best Season'; })  || {};
+  var budget    = quickInfo.find(function(q) { return q.label === 'Daily Budget'; }) || {};
+  var flight    = quickInfo.find(function(q) { return q.label === 'Avg Flight'; })   || {};
+  var visa      = quickInfo.find(function(q) { return q.label === 'Visa'; })         || {};
+  var stay      = quickInfo.find(function(q) { return q.label === 'Ideal Stay'; })   || {};
+
+  var boxes = [
+    { icon: '📅', label: 'BEST SEASON', val: season.value || '—' },
+    { icon: '💰', label: 'DAILY BUDGET', val: budget.value ? convertPriceStr(budget.value) : '—' },
+    { icon: '✈️', label: 'AVG FLIGHT',  val: flight.value ? convertPriceStr(flight.value) : '—' },
+    { icon: '🛂', label: 'VISA',        val: visa.value   || '—' },
+    { icon: '⏱️', label: 'IDEAL STAY',  val: stay.value   || '—' },
+  ];
+
+  var boxW   = 176;
+  var boxH   = 170;
+  var startX = 60;
+  var startY = 510;
+  var gapX   = 18;
+
+  boxes.forEach(function(box, i) {
+    var x = startX + i * (boxW + gapX);
+    var y = startY;
+
+    // Box background
+    ctx.fillStyle = 'rgba(255,255,255,0.05)';
+    roundRect(ctx, x, y, boxW, boxH, 16);
+    ctx.fill();
+
+    // Accent top border
+    ctx.fillStyle = t.accent;
+    roundRect(ctx, x, y, boxW, 3, 2);
+    ctx.fill();
+
+    // Icon
+    ctx.font = '28px serif';
+    ctx.fillText(box.icon, x + 16, y + 46);
+
+    // Label
+    ctx.font      = 'bold 16px sans-serif';
+    ctx.fillStyle = t.sub;
+    ctx.fillText(box.label, x + 16, y + 80);
+
+    // Value
+    ctx.font      = 'bold 22px sans-serif';
+    ctx.fillStyle = t.accent;
+    var val = box.val.length > 12 ? box.val.substring(0, 12) + '…' : box.val;
+    ctx.fillText(val, x + 16, y + 116);
+  });
+
+  // Tips section
+  var tips = data.tips || [];
+  if (tips.length > 0) {
+    ctx.font      = 'bold 22px sans-serif';
+    ctx.fillStyle = t.accent;
+    ctx.fillText('✦ PRO TIP', 60, 730);
+
+    ctx.font      = '24px sans-serif';
+    ctx.fillStyle = t.sub;
+    wrapText(ctx, tips[0], 60, 768, 960, 36);
+  }
+
+  // Bottom bar
+  var barGrad = ctx.createLinearGradient(0, H - 100, W, H);
+  barGrad.addColorStop(0, t.accent + '22');
+  barGrad.addColorStop(1, 'transparent');
+  ctx.fillStyle = barGrad;
+  ctx.fillRect(0, H - 100, W, 100);
+
+  // Bottom divider
+  ctx.fillStyle = t.accent + '44';
+  ctx.fillRect(0, H - 100, W, 1);
+
+  // Branding
+  ctx.font      = 'bold 28px sans-serif';
+  ctx.fillStyle = t.accent;
+  ctx.fillText('◎ WorldAI360', 60, H - 40);
+
+  ctx.font      = '22px sans-serif';
+  ctx.fillStyle = t.sub;
+  ctx.textAlign = 'right';
+  ctx.fillText('AI-Powered Travel Intelligence', W - 60, H - 40);
+  ctx.textAlign = 'left';
+}
+
+// Helper — wrap long text
+function wrapText(ctx, text, x, y, maxW, lineH) {
+  if (!text) return;
+  var words = text.split(' ');
+  var line  = '';
+  var lines = 0;
+  for (var i = 0; i < words.length; i++) {
+    var test = line + words[i] + ' ';
+    if (ctx.measureText(test).width > maxW && line !== '') {
+      ctx.fillText(line.trim(), x, y);
+      line = words[i] + ' ';
+      y   += lineH;
+      lines++;
+      if (lines >= 2) { ctx.fillText(line.trim() + '...', x, y); return; }
+    } else {
+      line = test;
+    }
+  }
+  ctx.fillText(line.trim(), x, y);
+}
+
+// Helper — rounded rectangle
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.lineTo(x + w - r, y);
+  ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r);
+  ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h);
+  ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.closePath();
+}
+
+function downloadTripCard() {
+  var canvas = document.getElementById('tripcardCanvas');
+  if (!canvas) return;
+  var dest = (lastParsedData && lastParsedData.destination) || 'trip';
+  var link  = document.createElement('a');
+  link.download = dest.replace(/\s+/g, '-').toLowerCase() + '-trip-card.png';
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
+
+function copyTripCard() {
+  var canvas = document.getElementById('tripcardCanvas');
+  if (!canvas) return;
+  canvas.toBlob(function(blob) {
+    try {
+      navigator.clipboard.write([
+        new ClipboardItem({ 'image/png': blob })
+      ]).then(function() {
+        var btn = document.querySelector('.tripcard-copy-btn');
+        var orig = btn.innerHTML;
+        btn.innerHTML = '✓ Copied!';
+        setTimeout(function() { btn.innerHTML = orig; }, 2000);
+      });
+    } catch(e) {
+      alert('Copy supported nahi hai is browser mein. Download use karo!');
+    }
+  });
 }
