@@ -25,11 +25,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Inject Gemini API Key into script.js
+      - name: Inject Groq API Key into script.js
         run: |
-          sed -i "s/YOUR_GEMINI_API_KEY/${{ secrets.GEMINI_API_KEY }}/g" script.js
+          sed -i "s/YOUR_GROQ_KEY/${{ secrets.GROQ_API_KEY }}/g" script.js
           echo "Injection check:"
-          grep -n "GEMINI_API_KEY" script.js | head -5
+          grep -n "GROQ_API_KEY" script.js | head -5
 
       - name: Setup GitHub Pages
         uses: actions/configure-pages@v4
