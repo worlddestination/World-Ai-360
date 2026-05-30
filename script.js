@@ -446,7 +446,7 @@ fetch('https://api.pexels.com/v1/search?query=' + encodeURIComponent(searchQuery
     return '<img src="' + p.src.medium + '" ' +
       'alt="' + searchQuery + '" loading="lazy" ' +
       'style="cursor:pointer;width:100%;height:100%;object-fit:cover;" ' +
-      'onclick="openLightbox(' + idx + ')">';
+      'onclick="window.openLightbox(' + idx + ')">'
   }).join('');
 
   if (photos.length === 0) {
@@ -642,7 +642,7 @@ document.addEventListener('click', function(e) {
 });
 
 // LIGHTBOX
-function openLightbox(startIdx) {
+window.openLightbox = function(startIdx) {
   var photos = window._allPhotos || [];
   if (photos.length === 0) return;
   var current = startIdx;
