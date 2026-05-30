@@ -478,6 +478,7 @@ function renderResult(data, originalQuery) {
       '<div class="related-desc">' + r.country + ' — ' + r.desc + '</div></div>';
   }).join('');
    initFollowupChat(data.destination);
+   setTimeout(updateCalc, 100);
   showResult();
   setTimeout(function() {
     document.getElementById('resultContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -835,4 +836,75 @@ async function sendFollowup() {
   isChatLoading = false;
   btn.disabled  = false;
   input.focus();
+}
+// ═══════════ COST CALCULATOR ═══════════
+let selectedTierIndex = 0;
+
+function selectTier(btn) {
+  document.querySelectorAll('.calc-tier-btn').forEach(function(b) {
+    b.classList.remove('active');
+  });
+  btn.classList.add('active');
+  selectedTierIndex = parseInt(btn.dataset.tier);
+  updateCalc();
+}
+
+function parsePriceRange(str) {
+  if (!str) return { min: 0, max: 0 };
+  var nums = str.replace(/[^0-9.\-]/g, ' ').trim().split(/\s+/).filter(Boolean).map(Number);
+  if (nums.length >= 2) return { min: nums[0], max: nums[1] };
+  if (nums.length === 1) return { min: nums[0], max: nums[0] };
+  return { min: 0, max: 0 };
+}
+
+function updateCalc() {
+  if (!lastParsedData || !lastParsedData.budgetBreakdown) return;
+
+  var days    = parseInt(document.getElementById('calcDays').value);
+  var people  = parseInt(document.getElementById('calcPeople').value);
+  var tier    = lastParsedData.budgetBreakdown[selectedTierIndex];
+
+  document.getElementById('calcDaysVal').textContent   = days + ' day' + (days > 1 ? 's' : '');
+  document.getElementById('calcPeopleVal').textContent = people + ' person' + (people > 1 ? 's' : '');
+
+  if (!tier) return;
+
+  var dayRange  = parsePriceRange(tier.pricePerDay);
+  var minPerDay = dayRange.min;
+  var maxPerDay = dayRange.max;
+
+  var minTotal  = Math.round(minPerDay * days * people);
+  var maxTotal  = Math.round(maxPerDay * days * people);
+  var minPerson = Math.round(minPerDay * days);
+  var maxPerson = Math.round(maxPerDay * days);
+
+  var flightInfo  = lastParsedData.quickInfo && lastParsedData.quickInfo.find(function(q) { return q.label === 'Avg Flight'; });
+  var flightRange = flightInfo ? parsePriceRange(flightInfo.value) : { min: 0, max: 0 };
+  var flightMin   = Math.round(flightRange.min * people);
+  var flightMax   = Math.round(flightRange.max * people);
+
+  var c   = CURRENCIES[selectedCurrency];
+  var sym = c.symbol;
+  var r   = c.rate;
+
+  function fmt(n) {
+    var converted = Math.round(n * r);
+    return sym + (converted >= 1000 ? (converted / 1000).toFixed(1) + 'K' : converted);
+  }
+
+  document.getElementById('calcPerDay').textContent    = fmt(minPerDay) + ' – ' + fmt(maxPerDay);
+  document.getElementById('calcPerPerson').textContent = fmt(minPerson) + ' – ' + fmt(maxPerson);
+  document.getElementById('calcTotal').textContent     = fmt(minTotal)  + ' – ' + fmt(maxTotal);
+  document.getElementById('calcFlights').textContent   = flightMin > 0 ? fmt(flightMin) + ' – ' + fmt(flightMax) : 'N/A';
+
+  var breakdown = document.getElementById('calcBreakdown');
+  breakdown.innerHTML = (tier.items || []).map(function(item) {
+    var iRange = parsePriceRange(item.value);
+    var iMin   = Math.round(iRange.min * days * people);
+    var iMax   = Math.round(iRange.max * days * people);
+    return '<div class="calc-breakdown-row">' +
+      '<span>' + item.label + ' (' + days + 'd × ' + people + 'p)</span>' +
+      '<span>' + fmt(iMin) + ' – ' + fmt(iMax) + '</span>' +
+    '</div>';
+  }).join('');
 }
