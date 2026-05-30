@@ -804,7 +804,7 @@ async function sendFollowup() {
     tips:        lastParsedData.tips
   }) : '';
 
-  const systemPrompt = var systemPrompt = 'You are a friendly expert travel guide for ' + destination + '. ' +
+  const systemPrompt = 'You are a friendly expert travel guide for ' + destination + '. ' +
     'Context: ' + context + '. ' +
     'IMPORTANT: Answer ENTIRELY in ' + selectedLang + ' language. ' +
     'Answer in 2-4 short paragraphs. Use **bold** for key points. Be specific, practical, and conversational. ' +
