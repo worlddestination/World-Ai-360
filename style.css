@@ -2357,3 +2357,50 @@ body.cursor-hover .cursor-ring {
 .tripcard-copy-btn:hover {
   background: rgba(201,168,76,0.08);
 }
+/* ═══════════ LANGUAGE SELECTOR ═══════════ */
+.lang-selector-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 1.2rem;
+  padding-bottom: 1.2rem;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.lang-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.lang-pill {
+  padding: 7px 14px;
+  border-radius: 50px;
+  border: 1px solid rgba(255,255,255,0.1);
+  background: transparent;
+  color: rgba(232,230,224,0.6);
+  font-size: 12px;
+  font-family: inherit;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.lang-pill.active {
+  background: rgba(201,168,76,0.15);
+  border-color: rgba(201,168,76,0.5);
+  color: #C9A84C;
+  font-weight: 600;
+}
+
+.lang-pill:hover:not(.active) {
+  background: rgba(255,255,255,0.05);
+  color: rgba(232,230,224,0.9);
+}
+
+/* Arabic ke liye RTL support */
+.lang-rtl {
+  direction: rtl;
+  text-align: right;
+  font-size: 15px;
+  line-height: 1.9;
+}
