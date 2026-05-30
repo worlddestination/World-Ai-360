@@ -320,8 +320,6 @@ async function handleSearch() {
   showLoading();
 
   const prompt = buildPrompt(query, selectedTripType, selectedBudget);
-   // Ye line add karo prompt string mein, "Trip type:" ke upar
-${ window._userLocation ? `User is from ${window._userLocation.city}, ${window._userLocation.country}. Tailor flight costs and travel advice accordingly.` : '' }
 
   try {
     const responseText = await callGemini(prompt);
@@ -383,6 +381,9 @@ async function callGemini(prompt) {
 
 // ─── PROMPT BUILDER ──────────────────────────────────────────────────────────
 function buildPrompt(query, tripType, budget) {
+   const locationHint = window._userLocation 
+    ? `User is from ${window._userLocation.city}, ${window._userLocation.country}. Tailor flight costs accordingly.` 
+    : '';
   return `You are World AI 360 — the world's most comprehensive travel intelligence system.
 A user is asking about: "${query}"
 Trip type: ${tripType} | Budget: ${budget}
