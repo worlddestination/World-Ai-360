@@ -445,8 +445,8 @@ fetch('https://api.pexels.com/v1/search?query=' + encodeURIComponent(searchQuery
   imgGrid.innerHTML = photos.slice(0, 3).map(function(p, idx) {
     return '<img src="' + p.src.medium + '" ' +
       'alt="' + searchQuery + '" loading="lazy" ' +
-      'style="cursor:pointer;width:100%;height:100%;object-fit:cover;" ' +
-      'onclick="window.openLightbox(' + idx + ')">'
+      'style="cursor:pointer;width:100%;height:100%;object-fit:cover;position:relative;z-index:10;" ' +
+       'onclick="window.openLightbox(' + idx + ')">'
   }).join('');
 
   if (photos.length === 0) {
