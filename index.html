@@ -236,6 +236,71 @@
     </div>
   </div>
 </section>
+  <!-- ═══════════════════════════════ DREAM TRIP ══════════════════════════ -->
+<section class="dream-section" id="dreamSection">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">✨ Dream Trip</span>
+      <h2 class="section-title">Apna Mood Batao — AI Trip Dhundega</h2>
+      <p class="section-sub">Koi destination mat socho — bas apna vibe, budget aur travel style likho</p>
+    </div>
+
+    <div class="dream-card">
+
+      <!-- Mood Input -->
+      <div class="dream-input-wrap">
+        <div class="dream-input-icon">✨</div>
+        <textarea
+          id="dreamInput"
+          class="dream-input"
+          placeholder="e.g. 'I want snow mountains and adventure under $1500' ya 'Peaceful beach, no crowds, honeymoon, 10 days' ya 'Solo trip, street food culture, budget $800'"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Mood Quick Pills -->
+      <div class="dream-mood-pills">
+        <p class="dream-mood-label">Ya inme se chuno:</p>
+        <div class="dream-pills-wrap">
+          <button class="dream-pill" onclick="fillDreamInput('Peaceful beach honeymoon, luxury, 7 days, budget $3000')">🏖️ Honeymoon Beach</button>
+          <button class="dream-pill" onclick="fillDreamInput('Snow mountains trekking adventure, budget $1200, 10 days')">🏔️ Mountain Adventure</button>
+          <button class="dream-pill" onclick="fillDreamInput('Solo trip, street food culture, historical sites, budget $800')">🎒 Solo Budget</button>
+          <button class="dream-pill" onclick="fillDreamInput('Family trip with kids, safe, fun activities, 8 days, budget $4000')">👨‍👩‍👧 Family Fun</button>
+          <button class="dream-pill" onclick="fillDreamInput('Luxury relaxation, spas, fine dining, no budget limit')">💎 Luxury Escape</button>
+          <button class="dream-pill" onclick="fillDreamInput('Wildlife safari, nature photography, unique experience, budget $2000')">🦁 Wildlife Safari</button>
+          <button class="dream-pill" onclick="fillDreamInput('City life, shopping, nightlife, food scene, budget $1500')">🌆 City Vibes</button>
+          <button class="dream-pill" onclick="fillDreamInput('Spiritual journey, temples, meditation, peaceful, budget $600')">🕌 Spiritual Trip</button>
+        </div>
+      </div>
+
+      <!-- Generate Button -->
+      <button class="dream-btn" id="dreamBtn" onclick="generateDreamTrip()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+        </svg>
+        <span>Mera Dream Trip Dhundo</span>
+      </button>
+
+      <!-- Loading -->
+      <div class="dream-loading" id="dreamLoading" style="display:none">
+        <div class="loading-globe-mini"><div class="lgm-ring"></div><div class="lgm-ring r2"></div></div>
+        <p>AI tumhare liye perfect destinations dhundh raha hai...</p>
+      </div>
+
+      <!-- Results -->
+      <div class="dream-results" id="dreamResults" style="display:none">
+        <p class="dream-results-label">🎯 AI ne yeh 3 destinations suggest kiye tumhare liye:</p>
+        <div class="dream-cards-grid" id="dreamCardsGrid"></div>
+      </div>
+
+      <!-- Error -->
+      <div class="dream-error" id="dreamError" style="display:none">
+        <span>⚠️</span> <span id="dreamErrorMsg">Kuch error aa gaya.</span>
+      </div>
+
+    </div>
+  </div>
+</section>
 
   <!-- ═══════════════════════════════ MAIN SEARCH ══════════════════════════ -->
   <section class="explore-section" id="explore">
