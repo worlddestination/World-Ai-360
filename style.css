@@ -2548,3 +2548,80 @@ body.cursor-hover .cursor-ring {
 }
 .kamlesh-particles {
   position: absolute;
+   /* ═══ VISA CHECKER ═══ */
+.visa-section { margin-bottom: 2.5rem; }
+
+.visa-passport-selector { margin-bottom: 1.2rem; }
+
+.visa-select {
+  width: 100%;
+  max-width: 360px;
+  padding: 10px 16px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.12);
+  border-radius: 10px;
+  color: var(--text);
+  font-size: 0.95rem;
+  cursor: pointer;
+  margin-top: 8px;
+}
+
+.visa-result-card {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-top: 1rem;
+}
+
+.visa-status-badge {
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: 30px;
+  display: inline-block;
+  margin-bottom: 1.2rem;
+}
+.visa-free     { background: rgba(74,222,128,0.15); color: #4ade80; border: 1px solid rgba(74,222,128,0.3); }
+.visa-voa      { background: rgba(250,204,21,0.15);  color: #facc15; border: 1px solid rgba(250,204,21,0.3); }
+.visa-required { background: rgba(248,113,113,0.15); color: #f87171; border: 1px solid rgba(248,113,113,0.3); }
+.visa-check    { background: rgba(96,165,250,0.15);  color: #60a5fa; border: 1px solid rgba(96,165,250,0.3); }
+
+.visa-details-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.visa-detail-item { display: flex; flex-direction: column; gap: 4px; }
+.visa-detail-item.full { grid-column: 1 / -1; }
+
+.vdi-label {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.vdi-val { font-size: 0.95rem; color: var(--text); font-weight: 500; }
+
+.visa-docs-list {
+  list-style: none;
+  padding: 0;
+  margin: 4px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.visa-docs-list li { font-size: 0.9rem; color: var(--text); }
+.visa-docs-list li::before { content: "✓ "; color: #4ade80; font-weight: 600; }
+
+.visa-apply-link {
+  display: inline-block;
+  color: var(--gold);
+  font-size: 0.9rem;
+  text-decoration: none;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(201,168,76,0.3);
+  transition: opacity 0.2s;
+}
+.visa-apply-link:hover { opacity: 0.75; }
