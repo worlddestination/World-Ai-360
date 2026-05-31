@@ -108,6 +108,73 @@
       <div class="scroll-line"></div>
     </div>
   </section>
+  <!-- ═══════════════════════════════ PHOTO FINDER ════════════════════════ -->
+<section class="photo-finder-section" id="photoFinderSection">
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">📸 Photo Magic</span>
+      <h2 class="section-title">Koi Bhi Photo Upload Karo</h2>
+      <p class="section-sub">AI batayega — yeh jagah kahan hai, aur poora travel guide bhi milega!</p>
+    </div>
+
+    <div class="photo-upload-card" id="photoUploadCard">
+
+      <!-- Drop Zone -->
+      <div class="photo-drop-zone" id="photoDropZone"
+        onclick="document.getElementById('photoFileInput').click()"
+        ondragover="photoDragOver(event)"
+        ondragleave="photoDragLeave(event)"
+        ondrop="photoDrop(event)">
+        <input type="file" id="photoFileInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)"/>
+        <div class="photo-drop-icon">📷</div>
+        <p class="photo-drop-text">Photo yahan drop karo ya click karke select karo</p>
+        <p class="photo-drop-sub">JPG, PNG, WEBP — koi bhi jagah ki photo</p>
+      </div>
+
+      <!-- Preview -->
+      <div class="photo-preview-wrap" id="photoPreviewWrap" style="display:none">
+        <img id="photoPreviewImg" class="photo-preview-img" src="" alt="Uploaded photo"/>
+        <button class="photo-remove-btn" onclick="removePhoto()">✕ Remove</button>
+      </div>
+
+      <!-- Identify Button -->
+      <button class="photo-identify-btn" id="photoIdentifyBtn" onclick="identifyDestination()" style="display:none">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+        </svg>
+        <span>AI Se Identify Karo</span>
+      </button>
+
+      <!-- Loading -->
+      <div class="photo-loading" id="photoLoading" style="display:none">
+        <div class="loading-globe-mini"><div class="lgm-ring"></div><div class="lgm-ring r2"></div></div>
+        <p>AI photo analyze kar raha hai...</p>
+      </div>
+
+      <!-- Result -->
+      <div class="photo-result" id="photoResult" style="display:none">
+        <div class="photo-result-inner">
+          <div class="photo-result-flag" id="photoResultFlag"></div>
+          <div class="photo-result-info">
+            <div class="photo-result-name" id="photoResultName"></div>
+            <div class="photo-result-country" id="photoResultCountry"></div>
+            <div class="photo-result-desc" id="photoResultDesc"></div>
+          </div>
+        </div>
+        <div class="photo-confidence" id="photoConfidence"></div>
+        <button class="photo-guide-btn" id="photoGuideBtn" onclick="searchFromPhotoResult()">
+          ✈️ Poora Travel Guide Dekho →
+        </button>
+      </div>
+
+      <!-- Error -->
+      <div class="photo-error" id="photoError" style="display:none">
+        <span>⚠️</span> <span id="photoErrorMsg">Kuch error aa gaya.</span>
+      </div>
+
+    </div>
+  </div>
+</section>
 
   <!-- ═══════════════════════════════ QUICK PILLS ══════════════════════════ -->
   <section class="quick-section">
