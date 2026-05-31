@@ -1834,3 +1834,170 @@ function startVoiceSearch() {
 
   recog.start();
 }
+// ═══════════ PHOTO → DESTINATION IDENTIFIER ═══════════
+var photoBase64 = null;
+var photoIdentifiedQuery = '';
+
+function photoDragOver(e) {
+  e.preventDefault();
+  document.getElementById('photoDropZone').classList.add('dragover');
+}
+
+function photoDragLeave(e) {
+  document.getElementById('photoDropZone').classList.remove('dragover');
+}
+
+function photoDrop(e) {
+  e.preventDefault();
+  document.getElementById('photoDropZone').classList.remove('dragover');
+  var file = e.dataTransfer.files[0];
+  if (file && file.type.startsWith('image/')) {
+    processPhotoFile(file);
+  }
+}
+
+function handlePhotoUpload(e) {
+  var file = e.target.files[0];
+  if (!file) return;
+  processPhotoFile(file);
+}
+
+function processPhotoFile(file) {
+  // File size check — 10MB max
+  if (file.size > 10 * 1024 * 1024) {
+    alert('Photo bahut badi hai! 10MB se choti photo use karo.');
+    return;
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    var result = e.target.result;
+    // base64 string extract karo (data:image/jpeg;base64, ke baad wala part)
+    photoBase64 = result.split(',')[1];
+    var mimeType = file.type || 'image/jpeg';
+    window._photoMimeType = mimeType;
+
+    // Preview dikhao
+    document.getElementById('photoPreviewImg').src = result;
+    document.getElementById('photoDropZone').style.display = 'none';
+    document.getElementById('photoPreviewWrap').style.display = 'block';
+    document.getElementById('photoIdentifyBtn').style.display = 'flex';
+    document.getElementById('photoResult').style.display = 'none';
+    document.getElementById('photoError').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removePhoto() {
+  photoBase64 = null;
+  photoIdentifiedQuery = '';
+  document.getElementById('photoFileInput').value = '';
+  document.getElementById('photoPreviewImg').src = '';
+  document.getElementById('photoDropZone').style.display = 'flex';
+  document.getElementById('photoPreviewWrap').style.display = 'none';
+  document.getElementById('photoIdentifyBtn').style.display = 'none';
+  document.getElementById('photoResult').style.display = 'none';
+  document.getElementById('photoError').style.display = 'none';
+}
+
+async function identifyDestination() {
+  if (!photoBase64) return;
+
+  // Loading dikhao
+  document.getElementById('photoIdentifyBtn').style.display = 'none';
+  document.getElementById('photoLoading').style.display = 'flex';
+  document.getElementById('photoResult').style.display = 'none';
+  document.getElementById('photoError').style.display = 'none';
+
+  try {
+    var mimeType = window._photoMimeType || 'image/jpeg';
+
+    var res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + GROQ_API_KEY
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        messages: [
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image_url',
+                image_url: {
+                  url: 'data:' + mimeType + ';base64,' + photoBase64
+                }
+              },
+              {
+                type: 'text',
+                text: 'Identify the travel destination or location in this photo. Respond ONLY with valid JSON, no markdown, no backticks:\n' +
+                  '{\n' +
+                  '  "destination": "City or Place Name",\n' +
+                  '  "country": "Country Name",\n' +
+                  '  "flag": "🌍",\n' +
+                  '  "confidence": "High / Medium / Low",\n' +
+                  '  "description": "One line about this place and why it is famous",\n' +
+                  '  "landmarks": ["landmark1", "landmark2"],\n' +
+                  '  "searchQuery": "Complete travel guide to [destination] [country]"\n' +
+                  '}'
+              }
+            ]
+          }
+        ],
+        max_tokens: 500,
+        temperature: 0.3
+      })
+    });
+
+    if (!res.ok) {
+      var errData = await res.json().catch(function() { return {}; });
+      throw new Error((errData.error && errData.error.message) || 'API Error: ' + res.status);
+    }
+
+    var data = await res.json();
+    var text = data.choices && data.choices[0] && data.choices[0].message && data.choices[0].message.content;
+    if (!text) throw new Error('Koi response nahi mila.');
+
+    // JSON parse karo
+    var clean = text.trim()
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/\s*```$/i, '');
+    var parsed = JSON.parse(clean);
+
+    // Result dikhao
+    photoIdentifiedQuery = parsed.searchQuery || ('Complete travel guide to ' + parsed.destination + ' ' + parsed.country);
+
+    document.getElementById('photoResultFlag').textContent = parsed.flag || '🌍';
+    document.getElementById('photoResultName').textContent = parsed.destination || 'Unknown';
+    document.getElementById('photoResultCountry').textContent = parsed.country || '';
+    document.getElementById('photoResultDesc').textContent = parsed.description || '';
+
+    var confidenceColor = parsed.confidence === 'High' ? '#4ade80' : parsed.confidence === 'Medium' ? '#facc15' : '#f87171';
+    document.getElementById('photoConfidence').innerHTML =
+      'AI Confidence: <span style="color:' + confidenceColor + ';font-weight:600;">' + (parsed.confidence || 'Medium') + '</span>' +
+      (parsed.landmarks && parsed.landmarks.length > 0 ? ' &nbsp;·&nbsp; Landmarks: ' + parsed.landmarks.join(', ') : '');
+
+    document.getElementById('photoLoading').style.display = 'none';
+    document.getElementById('photoResult').style.display = 'block';
+    document.getElementById('photoIdentifyBtn').style.display = 'flex';
+
+  } catch(err) {
+    document.getElementById('photoLoading').style.display = 'none';
+    document.getElementById('photoIdentifyBtn').style.display = 'flex';
+    document.getElementById('photoErrorMsg').textContent = err.message || 'Identify nahi ho saka. Doosri photo try karo.';
+    document.getElementById('photoError').style.display = 'block';
+    console.error('Photo identify error:', err);
+  }
+}
+
+function searchFromPhotoResult() {
+  if (!photoIdentifiedQuery) return;
+  var input = document.getElementById('searchInput');
+  input.value = photoIdentifiedQuery;
+  document.getElementById('searchClear').classList.add('visible');
+  document.getElementById('explore').scrollIntoView({ behavior: 'smooth' });
+  setTimeout(function() { handleSearch(); }, 600);
+}
