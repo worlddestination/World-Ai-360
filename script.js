@@ -407,6 +407,17 @@ function buildPrompt(query, tripType, budget) {
 '    { "month": "Nov", "temp": 28, "rainfall": 30,  "crowd": 70, "desc": "Peak season" },\n' +
 '    { "month": "Dec", "temp": 27, "rainfall": 20,  "crowd": 80, "desc": "Festive season" }\n' +
 '  ],\n' +
+     '  "visaDetails": {\n' +
+'    "passportFriendly": ["USA","UK","EU","Australia","Canada"],\n' +
+'    "visaOnArrival": ["India","Thailand","Brazil"],\n' +
+'    "visaRequired": ["Pakistan","Nigeria"],\n' +
+'    "duration": "30 days",\n' +
+'    "cost": "$25 USD",\n' +
+'    "processingTime": "On arrival / 3-5 days online",\n' +
+'    "documents": ["Valid passport (6 months validity)","Return ticket","Hotel booking","Sufficient funds proof"],\n' +
+'    "applyLink": "https://official-visa-site.com",\n' +
+'    "notes": "Any important visa note"\n' +
+'  },\n' +
     '  "related": [\n' +
     '    { "name": "Dest 1", "country": "Country", "desc": "Why visit", "emoji": "🌏", "query": "travel guide dest 1" },\n' +
     '    { "name": "Dest 2", "country": "Country", "desc": "Why visit", "emoji": "🏝️", "query": "travel guide dest 2" },\n' +
@@ -502,6 +513,12 @@ if (selectedLang === 'Arabic') {
    initBucketBar(data);
    initTripCard(data);
    initWeatherChart(data);
+   // Visa section
+if (data.visaDetails) {
+  document.getElementById('visaSection').style.display = 'block';
+  document.getElementById('visaResultCard').style.display = 'none';
+  document.getElementById('passportSelect').value = '';
+}
   showResult();
   setTimeout(function() {
     document.getElementById('resultContent').scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1703,4 +1720,59 @@ function highlightWeatherMonth(weatherData, idx) {
     card.style.borderColor = i === idx ? 'rgba(201,168,76,0.6)' : '';
     card.style.background  = i === idx ? 'rgba(201,168,76,0.1)' : '';
   });
+}
+// ═══════════ VISA CHECKER ═══════════
+function updateVisaInfo() {
+  var passport = document.getElementById('passportSelect').value;
+  if (!passport || !lastParsedData || !lastParsedData.visaDetails) return;
+
+  var v = lastParsedData.visaDetails;
+  var card = document.getElementById('visaResultCard');
+  var badge = document.getElementById('visaStatusBadge');
+  var grid = document.getElementById('visaDetailsGrid');
+
+  card.style.display = 'block';
+
+  var isFree = v.passportFriendly && v.passportFriendly.some(function(p) {
+    return p.toLowerCase().indexOf(passport.toLowerCase()) >= 0 ||
+           passport.toLowerCase().indexOf(p.toLowerCase()) >= 0;
+  });
+  var isVOA = v.visaOnArrival && v.visaOnArrival.some(function(p) {
+    return p.toLowerCase().indexOf(passport.toLowerCase()) >= 0 ||
+           passport.toLowerCase().indexOf(p.toLowerCase()) >= 0;
+  });
+  var isRequired = v.visaRequired && v.visaRequired.some(function(p) {
+    return p.toLowerCase().indexOf(passport.toLowerCase()) >= 0 ||
+           passport.toLowerCase().indexOf(p.toLowerCase()) >= 0;
+  });
+
+  var statusText, statusClass;
+  if (isFree) {
+    statusText = '✅ Visa Free Entry';
+    statusClass = 'visa-free';
+  } else if (isVOA) {
+    statusText = '🟡 Visa on Arrival';
+    statusClass = 'visa-voa';
+  } else if (isRequired) {
+    statusText = '🔴 Visa Required in Advance';
+    statusClass = 'visa-required';
+  } else {
+    statusText = '🔵 Check Official Sources';
+    statusClass = 'visa-check';
+  }
+
+  badge.textContent = statusText;
+  badge.className = 'visa-status-badge ' + statusClass;
+
+  var docs = (v.documents || []).map(function(d) {
+    return '<li>' + d + '</li>';
+  }).join('');
+
+  grid.innerHTML =
+    '<div class="visa-detail-item"><span class="vdi-label">Duration</span><span class="vdi-val">' + (v.duration || '—') + '</span></div>' +
+    '<div class="visa-detail-item"><span class="vdi-label">Cost</span><span class="vdi-val">' + convertPriceStr(v.cost || '—') + '</span></div>' +
+    '<div class="visa-detail-item"><span class="vdi-label">Processing</span><span class="vdi-val">' + (v.processingTime || '—') + '</span></div>' +
+    '<div class="visa-detail-item full"><span class="vdi-label">Documents Required</span><ul class="visa-docs-list">' + docs + '</ul></div>' +
+    (v.notes ? '<div class="visa-detail-item full"><span class="vdi-label">Important Note</span><span class="vdi-val">' + v.notes + '</span></div>' : '') +
+    (v.applyLink ? '<div class="visa-detail-item full"><a href="' + v.applyLink + '" target="_blank" class="visa-apply-link">🔗 Apply / Check Official Visa Site →</a></div>' : '');
 }
