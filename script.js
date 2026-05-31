@@ -418,6 +418,28 @@ function buildPrompt(query, tripType, budget) {
 '    "applyLink": "https://official-visa-site.com",\n' +
 '    "notes": "Any important visa note"\n' +
 '  },\n' +
+     '  "safetyIndex": {\n' +
+'    "overallScore": "7.5/10",\n' +
+'    "overallLabel": "Generally Safe",\n' +
+'    "crimeLevel": "Low / Medium / High",\n' +
+'    "crimeDesc": "One line about crime situation",\n' +
+'    "womenSafety": "8/10",\n' +
+'    "womenDesc": "One line for solo women travelers",\n' +
+'    "healthRisk": "Low / Medium / High",\n' +
+'    "healthDesc": "Vaccinations, water safety, hospitals",\n' +
+'    "naturalDisaster": "Low / Medium / High",\n' +
+'    "disasterDesc": "Earthquakes, floods, typhoons etc",\n' +
+'    "politicalStability": "Stable / Moderate / Unstable",\n' +
+'    "politicalDesc": "One line about political situation",\n' +
+'    "advisoryLevel": "Level 1 / Level 2 / Level 3 / Level 4",\n' +
+'    "advisoryDesc": "Exercise Normal Precautions / Exercise Increased Caution / Reconsider Travel / Do Not Travel",\n' +
+'    "emergencyNumbers": {\n' +
+'      "police": "110",\n' +
+'      "ambulance": "118",\n' +
+'      "tourist": "1300"\n' +
+'    },\n' +
+'    "safetTips": ["tip1", "tip2", "tip3"]\n' +
+'  },\n' +
     '  "related": [\n' +
     '    { "name": "Dest 1", "country": "Country", "desc": "Why visit", "emoji": "🌏", "query": "travel guide dest 1" },\n' +
     '    { "name": "Dest 2", "country": "Country", "desc": "Why visit", "emoji": "🏝️", "query": "travel guide dest 2" },\n' +
@@ -491,6 +513,13 @@ if (selectedLang === 'Arabic') {
   aiBody.classList.add('lang-rtl');
 } else {
   aiBody.classList.remove('lang-rtl');
+}
+   // Safety Index render karo
+if (data.safetyIndex) {
+  renderSafetyIndex(data.safetyIndex);
+  document.getElementById('safetySection').style.display = 'block';
+} else {
+  document.getElementById('safetySection').style.display = 'none';
 }
   renderBudget(data.budgetBreakdown);
 
@@ -2660,3 +2689,133 @@ document.addEventListener('DOMContentLoaded', function() {
   initGlobeObserver();
   renderGlobeDestPills();
 });
+// ═══════════ SAFETY INDEX DASHBOARD ═══════════
+function renderSafetyIndex(s) {
+  if (!s) return;
+
+  // Overall score color decide karo
+  var scoreNum = parseFloat(s.overallScore) || 0;
+  var scoreColor =
+    scoreNum >= 8 ? '#4ade80' :
+    scoreNum >= 6 ? '#facc15' :
+    scoreNum >= 4 ? '#fb923c' : '#f87171';
+
+  // Score circle
+  var circle = document.getElementById('safetyScoreCircle');
+  circle.style.borderColor = scoreColor;
+  circle.style.boxShadow   = '0 0 24px ' + scoreColor + '44';
+  document.getElementById('safetyScoreNum').textContent  = s.overallScore || '—';
+  document.getElementById('safetyScoreNum').style.color  = scoreColor;
+  document.getElementById('safetyOverallLabel').textContent = s.overallLabel || '';
+  document.getElementById('safetyOverallLabel').style.color = scoreColor;
+
+  // Advisory level color
+  var advColor =
+    s.advisoryLevel === 'Level 1' ? '#4ade80' :
+    s.advisoryLevel === 'Level 2' ? '#facc15' :
+    s.advisoryLevel === 'Level 3' ? '#fb923c' : '#f87171';
+
+  var advEl = document.getElementById('safetyAdvisory');
+  advEl.textContent   = s.advisoryLevel || '';
+  advEl.style.color   = advColor;
+  advEl.style.background = advColor + '22';
+  advEl.style.border  = '1px solid ' + advColor + '44';
+
+  document.getElementById('safetyAdvisoryDesc').textContent = s.advisoryDesc || '';
+
+  // Safety cards data
+  var cards = [
+    {
+      icon: '🔫',
+      label: 'Crime Level',
+      value: s.crimeLevel || '—',
+      desc: s.crimeDesc || '',
+      color: s.crimeLevel === 'Low' ? '#4ade80' : s.crimeLevel === 'Medium' ? '#facc15' : '#f87171'
+    },
+    {
+      icon: '👩',
+      label: 'Women Safety',
+      value: s.womenSafety || '—',
+      desc: s.womenDesc || '',
+      color: parseFloat(s.womenSafety) >= 7 ? '#4ade80' : parseFloat(s.womenSafety) >= 5 ? '#facc15' : '#f87171'
+    },
+    {
+      icon: '🏥',
+      label: 'Health Risk',
+      value: s.healthRisk || '—',
+      desc: s.healthDesc || '',
+      color: s.healthRisk === 'Low' ? '#4ade80' : s.healthRisk === 'Medium' ? '#facc15' : '#f87171'
+    },
+    {
+      icon: '🌪️',
+      label: 'Natural Disaster',
+      value: s.naturalDisaster || '—',
+      desc: s.disasterDesc || '',
+      color: s.naturalDisaster === 'Low' ? '#4ade80' : s.naturalDisaster === 'Medium' ? '#facc15' : '#f87171'
+    },
+    {
+      icon: '🏛️',
+      label: 'Political Stability',
+      value: s.politicalStability || '—',
+      desc: s.politicalDesc || '',
+      color: s.politicalStability === 'Stable' ? '#4ade80' : s.politicalStability === 'Moderate' ? '#facc15' : '#f87171'
+    }
+  ];
+
+  // Cards render karo
+  var grid = document.getElementById('safetyGrid');
+  grid.innerHTML = cards.map(function(card, i) {
+    return '<div class="safety-card" style="animation-delay:' + (i * 0.07) + 's">' +
+      '<div class="safety-card-top">' +
+        '<span class="safety-card-icon">' + card.icon + '</span>' +
+        '<span class="safety-card-value" style="color:' + card.color + '">' + card.value + '</span>' +
+      '</div>' +
+      '<div class="safety-card-label">' + card.label + '</div>' +
+      '<div class="safety-card-desc">' + card.desc + '</div>' +
+      '<div class="safety-card-bar-wrap">' +
+        '<div class="safety-card-bar" style="background:' + card.color + ';width:' + getBarWidth(card.value, card.label) + '%"></div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+
+  // Emergency numbers
+  var emNums = s.emergencyNumbers || {};
+  var emGrid = document.getElementById('safetyEmergencyGrid');
+  var emItems = [
+    { icon: '👮', label: 'Police',    val: emNums.police    || '—' },
+    { icon: '🚑', label: 'Ambulance', val: emNums.ambulance || '—' },
+    { icon: 'ℹ️', label: 'Tourist',   val: emNums.tourist   || '—' }
+  ];
+  emGrid.innerHTML = emItems.map(function(em) {
+    return '<div class="safety-em-item">' +
+      '<span class="safety-em-icon">' + em.icon + '</span>' +
+      '<span class="safety-em-label">' + em.label + '</span>' +
+      '<span class="safety-em-num">' + em.val + '</span>' +
+    '</div>';
+  }).join('');
+
+  // Safety tips
+  var tips = s.safetTips || s.safetyTips || [];
+  var tipsList = document.getElementById('safetyTipsList');
+  tipsList.innerHTML = tips.map(function(tip, i) {
+    return '<div class="safety-tip-item">' +
+      '<span class="safety-tip-num">' + (i + 1) + '</span>' +
+      '<span class="safety-tip-text">' + tip + '</span>' +
+    '</div>';
+  }).join('');
+}
+
+// Bar width helper — value se percentage nikalo
+function getBarWidth(value, label) {
+  if (label === 'Women Safety') {
+    var n = parseFloat(value) || 5;
+    return Math.round((n / 10) * 100);
+  }
+  if (value === 'Low'      || value === 'Stable')   return 85;
+  if (value === 'Medium'   || value === 'Moderate') return 50;
+  if (value === 'High'     || value === 'Unstable') return 20;
+  // Score jaise 7.5/10
+  var match = String(value).match(/^([\d.]+)/);
+  if (match) return Math.round((parseFloat(match[1]) / 10) * 100);
+  return 50;
+}
