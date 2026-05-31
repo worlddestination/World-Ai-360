@@ -108,6 +108,43 @@
       <div class="scroll-line"></div>
     </div>
   </section>
+  <!-- ═══════════════════════════════ 3D GLOBE ════════════════════════════ -->
+<section class="globe-section" id="globeSection">
+  <div class="globe-section-bg">
+    <div class="globe-section-orb g1"></div>
+    <div class="globe-section-orb g2"></div>
+  </div>
+  <div class="container">
+    <div class="section-header">
+      <span class="section-tag">🌐 Live Globe</span>
+      <h2 class="section-title">Explore the World in 3D</h2>
+      <p class="section-sub">Kisi bhi destination pe click karo — poora travel guide milega!</p>
+    </div>
+
+    <div class="globe-wrap">
+      <!-- Globe renders here -->
+      <div id="globeContainer"></div>
+
+      <!-- Tooltip -->
+      <div class="globe-tooltip" id="globeTooltip" style="display:none">
+        <div class="globe-tooltip-flag" id="globeTooltipFlag"></div>
+        <div class="globe-tooltip-name" id="globeTooltipName"></div>
+        <div class="globe-tooltip-sub">Click to explore →</div>
+      </div>
+
+      <!-- Mobile hint -->
+      <div class="globe-hint">
+        <span>🖱️ Drag to rotate</span>
+        <span>🔍 Scroll to zoom</span>
+        <span>📍 Click pin to explore</span>
+      </div>
+    </div>
+
+    <!-- Popular destinations pills under globe -->
+    <div class="globe-dest-pills" id="globeDestPills"></div>
+
+  </div>
+</section>
   <!-- ═══════════════════════════════ PHOTO FINDER ════════════════════════ -->
 <section class="photo-finder-section" id="photoFinderSection">
   <div class="container">
@@ -788,6 +825,8 @@
   </div>
 </div>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="https://unpkg.com/three@0.134.0/build/three.min.js"></script>
+<script src="https://unpkg.com/globe.gl@2.26.4/dist/globe.gl.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="script.js"></script>
 </body>
