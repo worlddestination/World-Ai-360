@@ -3547,3 +3547,8 @@ body.cursor-hover .cursor-ring {
   .safety-grid { grid-template-columns: 1fr 1fr; }
   .safety-emergency-grid { flex-direction: column; }
 }
+/* ═══ MISSING ANIMATION FIX ═══ */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
