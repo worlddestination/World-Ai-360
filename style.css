@@ -2657,8 +2657,8 @@ body.cursor-hover .cursor-ring {
 }
 
 @keyframes voicePulse {
-  0%, 100% { transform: translateY(-50%) scale(1); }
-  50%       { transform: translateY(-50%) scale(1.2); }
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(1.2); }
 }
    /* ═══ PHOTO FINDER SECTION ═══ */
 .photo-finder-section {
