@@ -8,7 +8,7 @@
 // ─── CONFIG ───────────────────────────────────────────────────────────────────
 // Replace with your Gemini API key or inject via GitHub Actions / env variable
 const GROQ_API_KEY = 'YOUR_GROQ_KEY';
-const GROQ_MODEL = 'compound-beta';
+const GROQ_MODEL = 'compound-beta-mini';
 const PEXELS_API_KEY = 'YOUR_PEXELS_KEY';
 
 const CURRENCIES = {
@@ -1950,7 +1950,7 @@ async function identifyDestination() {
         'Authorization': 'Bearer ' + GROQ_API_KEY
       },
       body: JSON.stringify({
-        model: 'meta-llama/llama-4-scout-17b-16e-instruct',
+        model: 'meta-llama/llama-4-maverick-17b-16e-instruct',
         messages: [
           {
             role: 'user',
