@@ -2001,3 +2001,152 @@ function searchFromPhotoResult() {
   document.getElementById('explore').scrollIntoView({ behavior: 'smooth' });
   setTimeout(function() { handleSearch(); }, 600);
 }
+// ═══════════ DREAM TRIP GENERATOR ═══════════
+function fillDreamInput(text) {
+  var input = document.getElementById('dreamInput');
+  input.value = text;
+  input.focus();
+}
+
+async function generateDreamTrip() {
+  var input = document.getElementById('dreamInput');
+  var mood  = (input.value || '').trim();
+
+  if (!mood) {
+    input.focus();
+    input.placeholder = '⚠️ Pehle apna mood/vibe likho!';
+    setTimeout(function() {
+      input.placeholder = "e.g. 'I want snow mountains and adventure under $1500'...";
+    }, 2000);
+    return;
+  }
+
+  var btn = document.getElementById('dreamBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 0.8s linear infinite"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg><span>Dhundh raha hoon...</span>';
+
+  document.getElementById('dreamLoading').style.display = 'flex';
+  document.getElementById('dreamResults').style.display = 'none';
+  document.getElementById('dreamError').style.display   = 'none';
+
+  var prompt = 'You are a world travel expert. A traveler describes their dream trip as: "' + mood + '"\n' +
+    'Suggest exactly 3 perfect destinations that match this vibe, budget, and style.\n' +
+    'Consider trip type: ' + selectedTripType + ' and budget preference: ' + selectedBudget + '\n' +
+    'IMPORTANT: All prices in USD using $ symbol.\n' +
+    'Respond ONLY with valid JSON, no markdown, no backticks:\n' +
+    '{\n' +
+    '  "trips": [\n' +
+    '    {\n' +
+    '      "destination": "City, Country",\n' +
+    '      "country": "Country",\n' +
+    '      "flag": "🌍",\n' +
+    '      "matchScore": 95,\n' +
+    '      "matchReason": "One line why this perfectly matches their vibe",\n' +
+    '      "bestFor": "Honeymoon / Adventure / Family etc",\n' +
+    '      "avgBudget": "$800-$1200 total",\n' +
+    '      "bestSeason": "Oct-Mar",\n' +
+    '      "topThings": ["thing1", "thing2", "thing3"],\n' +
+    '      "hiddenGem": "One unique thing about this place",\n' +
+    '      "searchQuery": "Complete travel guide to [destination]"\n' +
+    '    }\n' +
+    '  ]\n' +
+    '}';
+
+  try {
+    var res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + GROQ_API_KEY
+      },
+      body: JSON.stringify({
+        model: GROQ_MODEL,
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 1500,
+        temperature: 0.8
+      })
+    });
+
+    if (!res.ok) {
+      var errData = await res.json().catch(function() { return {}; });
+      throw new Error((errData.error && errData.error.message) || 'API Error: ' + res.status);
+    }
+
+    var data = await res.json();
+    var text = data.choices && data.choices[0] &&
+               data.choices[0].message && data.choices[0].message.content;
+    if (!text) throw new Error('Koi response nahi mila.');
+
+    var clean = text.trim()
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/\s*```$/i, '');
+    var parsed = JSON.parse(clean);
+
+    renderDreamResults(parsed.trips || []);
+
+  } catch(err) {
+    document.getElementById('dreamLoading').style.display = 'none';
+    document.getElementById('dreamErrorMsg').textContent = err.message || 'Error aa gaya. Dobara try karo!';
+    document.getElementById('dreamError').style.display  = 'block';
+    console.error('Dream trip error:', err);
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg><span>Mera Dream Trip Dhundo</span>';
+}
+
+function renderDreamResults(trips) {
+  document.getElementById('dreamLoading').style.display = 'none';
+
+  if (!trips || trips.length === 0) {
+    document.getElementById('dreamErrorMsg').textContent = 'Koi result nahi mila. Dobara try karo!';
+    document.getElementById('dreamError').style.display  = 'block';
+    return;
+  }
+
+  var grid = document.getElementById('dreamCardsGrid');
+
+  grid.innerHTML = trips.map(function(trip, i) {
+    var scoreColor =
+      trip.matchScore >= 90 ? '#4ade80' :
+      trip.matchScore >= 75 ? '#facc15' : '#f87171';
+
+    var topThings = (trip.topThings || []).map(function(t) {
+      return '<span class="dream-thing">' + t + '</span>';
+    }).join('');
+
+    return '<div class="dream-result-card" style="animation-delay:' + (i * 0.12) + 's">' +
+
+      '<div class="dream-card-top">' +
+        '<div class="dream-card-flag">' + (trip.flag || '🌍') + '</div>' +
+        '<div class="dream-match-score" style="color:' + scoreColor + '">' +
+          '<span class="score-num">' + (trip.matchScore || 0) + '</span>' +
+          '<span class="score-pct">% match</span>' +
+        '</div>' +
+      '</div>' +
+
+      '<div class="dream-card-name">' + (trip.destination || '') + '</div>' +
+      '<div class="dream-card-reason">' + (trip.matchReason || '') + '</div>' +
+
+      '<div class="dream-card-meta">' +
+        '<span>💰 ' + convertPriceStr(trip.avgBudget || '—') + '</span>' +
+        '<span>📅 ' + (trip.bestSeason || '—') + '</span>' +
+        '<span>🎯 ' + (trip.bestFor || '—') + '</span>' +
+      '</div>' +
+
+      '<div class="dream-things-wrap">' + topThings + '</div>' +
+
+      (trip.hiddenGem ?
+        '<div class="dream-hidden-gem">💎 ' + trip.hiddenGem + '</div>' : '') +
+
+      '<button class="dream-explore-btn" onclick="searchFromCard(\'' + escapeAttr(trip.searchQuery || '') + '\')">' +
+        '✈️ Full Guide Dekho →' +
+      '</button>' +
+
+    '</div>';
+  }).join('');
+
+  document.getElementById('dreamResults').style.display = 'block';
+  document.getElementById('dreamResults').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
