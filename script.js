@@ -337,7 +337,6 @@ async function callGroq(prompt) {
   messages: [{ role: 'user', content: prompt }],
   max_tokens: 3500,
   temperature: 0.6,
-  tools: [{ type: 'web_search' }]   // ← yeh ek line add karo
 })
   });
 
@@ -875,7 +874,6 @@ async function sendFollowup() {
   messages: messages,
   max_tokens: 800,
   temperature: 0.7,
-  tools: [{ type: 'web_search' }]   // ← yeh ek line add karo
 })
     });
 
@@ -2094,7 +2092,6 @@ async function generateDreamTrip() {
   messages: [{ role: 'user', content: prompt }],
   max_tokens: 1500,
   temperature: 0.8,
-  tools: [{ type: 'web_search' }]
 })
     });
 
