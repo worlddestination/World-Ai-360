@@ -1302,8 +1302,37 @@ body.cursor-hover .cursor-ring {
 }
 
 @media (max-width: 768px) {
-  .header { padding: 0 20px; }
+  .header { padding: 0 12px; height: auto; min-height: 60px; }
+  .header-inner { 
+    flex-wrap: wrap; 
+    gap: 8px; 
+    padding: 10px 0;
+    justify-content: space-between;
+  }
   .nav { display: none; }
+  
+  /* Currency + buttons ek line mein */
+  .currency-wrap { order: 3; }
+  .btn-header { 
+    padding: 8px 12px; 
+    font-size: 11px; 
+    order: 4;
+  }
+  .btn-wishlist { 
+    padding: 8px 10px; 
+    font-size: 11px;
+    order: 5;
+  }
+  .wishlist-count { 
+    width: 15px; 
+    height: 15px; 
+    font-size: 9px; 
+  }
+  
+  /* Logo size kam karo */
+  .logo-text { font-size: 18px; }
+  .logo-icon { font-size: 22px; }
+
   .hero { padding: 100px 20px 60px; }
   .container { padding: 0 20px; }
   .quick-label { padding: 0 20px; }
@@ -1321,11 +1350,15 @@ body.cursor-hover .cursor-ring {
   .footer-links { gap: 40px; }
   .footer-bottom { flex-direction: column; align-items: flex-start; }
 }
-
 @media (max-width: 480px) {
   .trending-grid { grid-template-columns: 1fr; }
   .hero-title { font-size: 44px; }
   .hero-stats { gap: 16px; }
+  
+  /* Header buttons hide karo sirf icon dikhao */
+  .btn-header span { display: none; }
+  .btn-header { padding: 8px 10px; }
+  .btn-wishlist .wishlist-count { display: inline-flex; }
 }
 /* === ENTERPRISE UPGRADES === */
 
